@@ -41,7 +41,10 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-RUN chmod +x ./docker-entrypoint.sh && \
+# Strip Windows CRLF line endings in case the file was checked out on Windows
+# (Git autocrlf=true converts LF to CRLF, which breaks sh inside Linux containers)
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && \
+    chmod +x ./docker-entrypoint.sh && \
     mkdir -p /app/data && \
     chown nextjs:nodejs /app/data
 

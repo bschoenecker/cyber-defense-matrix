@@ -77,7 +77,7 @@ Both exports are available to all users regardless of role.
 <details>
 <summary><strong>User Management and Account Settings</strong></summary>
 
-**User Management**
+### User Management
 
 Administrators can manage team access from the **User Management** page. Three roles are available:
 
@@ -87,7 +87,7 @@ Administrators can manage team access from the **User Management** page. Three r
 
 Admins can create new users, change roles, deactivate accounts, reset passwords, and require MFA enrollment for individual users.
 
-**Account Settings**
+### Account Settings
 
 Every user can access their account settings by clicking their name in the top-right corner of the app. From there they can:
 
@@ -132,24 +132,30 @@ Go to [https://www.docker.com/products/docker-desktop](https://www.docker.com/pr
 
 Download and extract the ZIP file, or clone the Git repository.
 
-### Step 3 - Generate a secret key
+### Step 3 - Generate two secret keys
 
-- (Mac) - In the **Terminal** app, type or paste this command and press Enter:
+The app requires two separate secret keys; one for securing login sessions and one for encrypting the database. Run the key generation command **twice** to get two different values.
+
+- (Mac) - In the **Terminal** app, run this command twice and copy each result:
    ```
    openssl rand -base64 32
    ```
-- (Windows) - Open *PowerShell* and paste this command:
+- (Windows) - Open *PowerShell* and run this command twice and copy each result:
    ```
    [Convert]::ToBase64String((1..32 | ForEach-Object { [byte](Get-Random -Max 256) }))
    ```
-- Copy the string.
 
-### Step 4 - Add your secret key to the app
+### Step 4 - Add your secret keys to the app
 
-Open `docker-compose.yml` in the project folder and replace the placeholder value here, keeping the quotes:
+Open `docker-compose.yml` in the project folder and replace both placeholder values, keeping the quotes. Use a **different value for each** — do not use the same key for both.
+
 ```
-NEXTAUTH_SECRET: "change-me-generate-with-openssl-rand-base64-32"
+NEXTAUTH_SECRET: "paste-your-first-generated-key-here"
+
+DB_ENCRYPTION_KEY: "paste-your-second-generated-key-here"
 ```
+
+> The `DB_ENCRYPTION_KEY` encrypts your database file on disk. If you lose this key you will not be able to read your data, so store it somewhere safe such as a password manager.
 
 ### Step 5 - Start the app
 

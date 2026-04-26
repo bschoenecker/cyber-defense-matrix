@@ -82,7 +82,59 @@ Administrators can manage team access from the **User Management** page. Three r
 - **Editor** - can create, edit, and delete controls, and export
 - **Viewer** - read-only access and export; cannot modify controls
 
-Admins can create new users, change roles, deactivate accounts, and reset passwords.
+Admins can create new users, change roles, deactivate accounts, reset passwords, and require MFA enrollment for individual users.
+
+---
+
+### Account Settings and Two-Factor Authentication
+
+Every user can access their account settings by clicking their name in the top-right corner of the app. From there they can:
+
+- **Change their password** - requires the current password to confirm
+- **Set up two-factor authentication (MFA)** - uses a TOTP authenticator app such as Google Authenticator or Authy
+
+**Setting up MFA:**
+1. Click your name in the top-right corner and go to Account Settings
+2. Scroll to the Two-Factor Authentication section and click **Set up MFA**
+3. Scan the QR code with your authenticator app, or enter the text key manually
+4. Enter the 6-digit code shown in your app to verify and activate MFA
+5. On future logins, you will be prompted for a code after entering your password
+
+**If an administrator has required MFA for your account:**
+When you next log in, you will be directed to Account Settings automatically and prevented from accessing the rest of the app until MFA is set up. Once you complete enrollment and verify a code, the app will sign you out and prompt you to log back in. After logging back in, full access is restored.
+
+**Disabling MFA:**
+MFA can be disabled from the Account Settings page by entering your current password to confirm. Note that if your administrator has required MFA for your account, disabling it will restrict your access again on your next login.
+
+---
+
+## Security
+
+### Database Encryption
+
+All application data is stored in a SQLite database that is **encrypted at rest using AES-256-CBC**. The database file on the host machine (`./data/cdm.db.enc`) is fully encrypted and cannot be opened or read without the encryption key. The decrypted copy exists only inside the running container in memory-mapped temporary storage and is never written to the host filesystem.
+
+Encryption and decryption are handled automatically at container startup and shutdown using the `DB_ENCRYPTION_KEY` you set in `docker-compose.yml`. To generate a strong key:
+
+```
+openssl rand -base64 32
+```
+
+If the container is stopped gracefully (via `docker compose down`), the database is re-encrypted before the container exits. A 30-second grace period is configured to ensure this completes before Docker force-kills the container.
+
+### Two-Factor Authentication
+
+The app supports TOTP-based two-factor authentication (compatible with Google Authenticator, Authy, and any RFC 6238 authenticator app). When enabled, a 6-digit rotating code is required at every login in addition to a password.
+
+Administrators can require MFA enrollment for any user account from the User Management page. Users subject to this requirement are gated from accessing the app until they complete setup.
+
+### Passwords
+
+All passwords are hashed using **bcrypt with a cost factor of 12** before being stored. Plain-text passwords are never written to the database.
+
+### Roles and Access Control
+
+Access is enforced server-side on every request. Viewers cannot modify data even if they manipulate the client. Editors cannot access user management. All export routes require authentication.
 
 ---
 
@@ -160,6 +212,35 @@ Sign in with the default credentials:
 - **Password:** `ChangeMe123!`
 
 > You should change the default password after your first login via the User Management page.
+
+---
+
+### Security
+
+**Security Hardening**
+
+- `X-Frame-Options: DENY` - no clickjacking via iframes
+- `X-Content-Type-Options: nosniff` - no MIME sniffing
+- `Content-Security-Policy` - blocks loading scripts/styles/images from other origins
+- `Permissions-Policy` - disables camera, mic, geolocation
+- Passwords bcrypt-hashed at cost 12
+- Database AES-256 encrypted at rest
+- TOTP MFA with admin-enforced enrollment
+- Server-side RBAC on every action and route
+- Non-root Docker user
+- JWT sessions (no server-side session store to attack)
+
+**Rate Limiting**
+
+- 10 failed login attempts per IP per 15 minutes
+- 10 failed attempts per email address per 15 minutes (blocks distributed attacks targeting one account)
+- Sessions expire after 8 hours
+
+**HTTP / HTTPS**
+
+- **Local use:** The app runs over HTTP on `localhost`. Traffic never leaves your computer. The database is AES-256 encrypted on disk regardless of whether you use HTTP or HTTPS.
+
+- **Shared/networked deployment:** If you deploy this on a server and your team accesses it over a network, HTTPS is strongly recommended. A `docker-compose.prod.yml` and `Caddyfile` are included in the project. Point a domain name at your server, edit the domain in both files, and run `docker compose -f docker-compose.prod.yml up --build`. Caddy will handle obtaining and renewing a free TLS certificate automatically. No certificate management required.
 
 ---
 

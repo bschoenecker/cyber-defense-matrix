@@ -14,6 +14,10 @@ out/
 data/
 prisma/data/
 
+# caddy TLS cert storage (auto-generated, do not commit)
+caddy_data/
+caddy_config/
+
 # misc
 .DS_Store
 *.pem

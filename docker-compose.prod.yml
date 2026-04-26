@@ -1,0 +1,51 @@
+# Production deployment with HTTPS via Caddy.
+# See Caddyfile for setup instructions before using this file.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up --build
+
+services:
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - cdm
+    networks:
+      - internal
+
+  cdm:
+    build: .
+    expose:
+      - "3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Generate with: openssl rand -base64 32  (use a DIFFERENT value to DB_ENCRYPTION_KEY)
+      NEXTAUTH_SECRET: "change-me-generate-with-openssl-rand-base64-32"
+
+      # Must match your domain in the Caddyfile
+      NEXTAUTH_URL: "https://cdm.example.com"
+
+      # Generate with: openssl rand -base64 32  (use a DIFFERENT value to NEXTAUTH_SECRET)
+      DB_ENCRYPTION_KEY: "change-me-generate-with-openssl-rand-base64-32"
+
+    restart: unless-stopped
+    stop_grace_period: 30s
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin, requireAuth } from '@/lib/auth-helpers'
 import bcrypt from 'bcryptjs'
+import { validatePassword } from '@/lib/password'
 
 export async function createUser(fd: FormData) {
   await requireAdmin()
@@ -14,6 +15,9 @@ export async function createUser(fd: FormData) {
   const role = fd.get('role') as string
 
   if (!name || !email || !password || !role) throw new Error('All fields required')
+
+  const pwError = validatePassword(password)
+  if (pwError) throw new Error(pwError)
 
   const passwordHash = await bcrypt.hash(password, 12)
   await db.user.create({ data: { name, email, passwordHash, role: role as 'ADMIN' | 'EDITOR' | 'VIEWER' } })
@@ -40,9 +44,16 @@ export async function deleteUser(id: string) {
   revalidatePath('/settings/users')
 }
 
+export async function setMfaRequired(id: string, required: boolean) {
+  await requireAdmin()
+  await db.user.update({ where: { id }, data: { mfaRequired: required } })
+  revalidatePath('/settings/users')
+}
+
 export async function adminResetPassword(id: string, newPassword: string) {
   await requireAdmin()
-  if (!newPassword || newPassword.length < 8) throw new Error('Password must be at least 8 characters')
+  const pwError = validatePassword(newPassword)
+  if (pwError) throw new Error(pwError)
   const passwordHash = await bcrypt.hash(newPassword, 12)
   await db.user.update({ where: { id }, data: { passwordHash } })
 }

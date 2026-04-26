@@ -1,0 +1,28 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# PRODUCTION / SERVER DEPLOYMENT ONLY
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This file is NOT used by the default docker-compose.yml.
+# It is provided for deployments on a server with a real domain name.
+#
+# To use it:
+#   1. Replace "cdm.example.com" below with your actual domain name
+#   2. Point your domain's DNS A record to this server's IP address
+#   3. Make sure ports 80 and 443 are open in your firewall
+#   4. Use docker-compose.prod.yml instead of docker-compose.yml:
+#        docker compose -f docker-compose.prod.yml up --build
+#
+# Caddy will automatically obtain and renew a free TLS certificate from
+# Let's Encrypt. No manual certificate management required.
+# ══════════════════════════════════════════════════════════════════════════════
+
+{
+    admin localhost:2019
+}
+
+cdm.example.com {
+    reverse_proxy cdm:3000
+    encode gzip zstd
+    header -Server
+    header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+}

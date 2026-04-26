@@ -17,6 +17,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # System Chromium + fonts for Puppeteer PDF generation
+# openssl is included for database encryption/decryption at rest
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -24,7 +25,8 @@ RUN apk add --no-cache \
     harfbuzz \
     ca-certificates \
     ttf-freefont \
-    font-noto
+    font-noto \
+    openssl
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
@@ -37,12 +39,15 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+RUN chmod +x ./docker-entrypoint.sh && \
+    mkdir -p /app/data && \
+    chown nextjs:nodejs /app/data
 
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma && node prisma/seed.js && node server.js"]
+CMD ["sh", "./docker-entrypoint.sh"]

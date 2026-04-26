@@ -6,7 +6,17 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      DATABASE_URL: "file:/app/data/cdm.db"
-      NEXTAUTH_SECRET: "change-me-generate-with-openssl-rand-base64-32"
+      # DATABASE_URL is managed by the entrypoint — do not set it here.
+      # The database is decrypted to a temp path inside the container at runtime
+      # and re-encrypted to ./data/cdm.db.enc on shutdown.
+
+      # Generate with: openssl rand -base64 32  (use a DIFFERENT value to DB_ENCRYPTION_KEY)
+      NEXTAUTH_SECRET: "rIzsoNPxQ5ztkWoYuxH1x2k9dlqgwD8w+gCQgxdyvwE="
+
       NEXTAUTH_URL: "http://localhost:3001"
+
+      # Generate with: openssl rand -base64 32  (use a DIFFERENT value to NEXTAUTH_SECRET)
+      DB_ENCRYPTION_KEY: "3Wla71qjUZxAHMhvYYwLHoIKwAEBFmmH9N/gLhs5jfU="
+
     restart: unless-stopped
+    stop_grace_period: 30s

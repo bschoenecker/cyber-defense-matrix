@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { createUser, updateUserRole, toggleUserActive, deleteUser, adminResetPassword } from '@/app/actions/users'
-import { PlusIcon, TrashIcon, KeyIcon } from 'lucide-react'
+import { createUser, updateUserRole, toggleUserActive, deleteUser, adminResetPassword, setMfaRequired } from '@/app/actions/users'
+import { validatePassword, PASSWORD_RULES } from '@/lib/password'
+import { PlusIcon, TrashIcon, KeyIcon, ShieldCheckIcon } from 'lucide-react'
 
 type User = {
   id: string
@@ -10,16 +11,12 @@ type User = {
   email: string
   role: string
   active: boolean
+  mfaEnabled: boolean
+  mfaRequired: boolean
   createdAt: Date
 }
 
 const ROLES = ['ADMIN', 'EDITOR', 'VIEWER']
-
-const ROLE_COLORS: Record<string, string> = {
-  ADMIN: 'bg-red-500/10 text-red-400 border-red-500/20',
-  EDITOR: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  VIEWER: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-}
 
 function CreateUserForm({ onDone }: { onDone: () => void }) {
   const [isPending, startTransition] = useTransition()
@@ -27,6 +24,9 @@ function CreateUserForm({ onDone }: { onDone: () => void }) {
 
   function handleSubmit(fd: FormData) {
     setError('')
+    const pw = fd.get('password') as string
+    const pwError = validatePassword(pw)
+    if (pwError) { setError(pwError); return }
     startTransition(async () => {
       try {
         await createUser(fd)
@@ -43,7 +43,10 @@ function CreateUserForm({ onDone }: { onDone: () => void }) {
       <div className="grid grid-cols-2 gap-3">
         <input name="name" required placeholder="Full name" className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500" />
         <input name="email" type="email" required placeholder="Email address" className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500" />
-        <input name="password" type="password" required placeholder="Password (min 8 chars)" minLength={8} className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500" />
+        <div className="space-y-1">
+          <input name="password" type="password" required placeholder="Password" minLength={12} className="w-full bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500" />
+          <p className="text-xs text-zinc-600">{PASSWORD_RULES}</p>
+        </div>
         <select name="role" required defaultValue="VIEWER" className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500">
           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
         </select>
@@ -70,6 +73,8 @@ function ResetPasswordModal({ userId, userName, onClose }: { userId: string; use
     const fd = new FormData(e.currentTarget)
     const pw = fd.get('password') as string
     setError('')
+    const pwError = validatePassword(pw)
+    if (pwError) { setError(pwError); return }
     startTransition(async () => {
       try {
         await adminResetPassword(userId, pw)
@@ -84,9 +89,12 @@ function ResetPasswordModal({ userId, userName, onClose }: { userId: string; use
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <form onSubmit={handleSubmit} className="w-80 rounded-xl border border-zinc-700 bg-zinc-900 p-5 space-y-3">
         <h3 className="text-sm font-semibold text-zinc-200">Reset password for {userName}</h3>
-        <input name="password" type="password" required minLength={8} placeholder="New password (min 8 chars)"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500"
-        />
+        <div className="space-y-1">
+          <input name="password" type="password" required minLength={12} placeholder="New password"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500"
+          />
+          <p className="text-xs text-zinc-600">{PASSWORD_RULES}</p>
+        </div>
         {error && <p className="text-xs text-red-400">{error}</p>}
         <div className="flex gap-2">
           <button type="submit" disabled={isPending} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs rounded transition-colors">
@@ -114,6 +122,10 @@ export function UserManager({ users, currentUserId }: { users: User[]; currentUs
     startTransition(async () => { await toggleUserActive(id, active) })
   }
 
+  function handleToggleMfaRequired(id: string, required: boolean) {
+    startTransition(async () => { await setMfaRequired(id, required) })
+  }
+
   function handleDelete(id: string, name: string) {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return
     startTransition(async () => { await deleteUser(id) })
@@ -122,10 +134,8 @@ export function UserManager({ users, currentUserId }: { users: User[]; currentUs
   return (
     <div className="space-y-4">
       {!creating && (
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition-colors"
-        >
+        <button onClick={() => setCreating(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition-colors">
           <PlusIcon className="h-3.5 w-3.5" />
           Add User
         </button>
@@ -149,6 +159,7 @@ export function UserManager({ users, currentUserId }: { users: User[]; currentUs
               <th className="text-left px-4 py-3 text-xs text-zinc-500 font-medium">Email</th>
               <th className="text-left px-4 py-3 text-xs text-zinc-500 font-medium">Role</th>
               <th className="text-left px-4 py-3 text-xs text-zinc-500 font-medium">Status</th>
+              <th className="text-center px-4 py-3 text-xs text-zinc-500 font-medium">Require MFA</th>
               <th className="text-left px-4 py-3 text-xs text-zinc-500 font-medium">Actions</th>
             </tr>
           </thead>
@@ -163,42 +174,50 @@ export function UserManager({ users, currentUserId }: { users: User[]; currentUs
                 </td>
                 <td className="px-4 py-3 text-sm text-zinc-400">{user.email}</td>
                 <td className="px-4 py-3">
-                  <select
-                    value={user.role}
-                    onChange={e => handleRoleChange(user.id, e.target.value)}
-                    className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500"
-                  >
+                  <select value={user.role} onChange={e => handleRoleChange(user.id, e.target.value)}
+                    className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500">
                     {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </td>
                 <td className="px-4 py-3">
-                  <button
-                    onClick={() => handleToggleActive(user.id, !user.active)}
+                  <button onClick={() => handleToggleActive(user.id, !user.active)}
                     disabled={user.id === currentUserId}
                     className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                       user.active
                         ? 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20'
                         : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/20'
-                    } disabled:cursor-not-allowed disabled:opacity-50`}
-                  >
+                    } disabled:cursor-not-allowed disabled:opacity-50`}>
                     {user.active ? 'Active' : 'Inactive'}
                   </button>
                 </td>
+                <td className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={user.mfaRequired}
+                      onChange={e => handleToggleMfaRequired(user.id, e.target.checked)}
+                      title={user.mfaRequired ? 'MFA enrollment required' : 'Click to require MFA'}
+                      className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-blue-500 cursor-pointer"
+                    />
+                    {user.mfaRequired && (
+                      <ShieldCheckIcon
+                        className={`h-3.5 w-3.5 shrink-0 ${user.mfaEnabled ? 'text-green-400' : 'text-amber-400'}`}
+                        aria-label={user.mfaEnabled ? 'MFA enrolled' : 'Pending enrollment'}
+                      />
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setResetTarget({ id: user.id, name: user.name })}
+                    <button onClick={() => setResetTarget({ id: user.id, name: user.name })}
                       title="Reset password"
-                      className="p-1 rounded text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700 transition-colors"
-                    >
+                      className="p-1 rounded text-zinc-600 hover:text-zinc-300 hover:bg-zinc-700 transition-colors">
                       <KeyIcon className="h-3.5 w-3.5" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(user.id, user.name)}
+                    <button onClick={() => handleDelete(user.id, user.name)}
                       disabled={user.id === currentUserId}
                       title="Delete user"
-                      className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-zinc-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
+                      className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-zinc-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
                       <TrashIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>

@@ -97,6 +97,9 @@ exports.Prisma.UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   role: 'role',
   active: 'active',
+  mfaSecret: 'mfaSecret',
+  mfaEnabled: 'mfaEnabled',
+  mfaRequired: 'mfaRequired',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -165,8 +168,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.19.3",
@@ -183,13 +185,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  EDITOR\n  VIEWER\n}\n\nmodel User {\n  id           String     @id @default(cuid())\n  name         String\n  email        String     @unique\n  passwordHash String\n  role         Role       @default(VIEWER)\n  active       Boolean    @default(true)\n  createdAt    DateTime   @default(now())\n  updatedAt    DateTime   @updatedAt\n  cdmEntries   CdmEntry[] @relation(\"CdmEntryCreator\")\n\n  @@map(\"users\")\n}\n\nmodel CdmEntry {\n  id           String   @id @default(cuid())\n  assetClass   String\n  nistFunction String\n  title        String\n  description  String?\n  tool         String?\n  implemented  Boolean  @default(false)\n  pptValue     Float?\n  processValue Float?\n  notes        String?\n  createdById  String?\n  createdBy    User?    @relation(\"CdmEntryCreator\", fields: [createdById], references: [id], onDelete: SetNull)\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  @@map(\"cdm_entries\")\n}\n",
-  "inlineSchemaHash": "156a048264dd7abab46a5e1ea5e1bec5c4bbe75681997a34b217280a23d92398",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  EDITOR\n  VIEWER\n}\n\nmodel User {\n  id           String     @id @default(cuid())\n  name         String\n  email        String     @unique\n  passwordHash String\n  role         Role       @default(VIEWER)\n  active       Boolean    @default(true)\n  mfaSecret    String?\n  mfaEnabled   Boolean    @default(false)\n  mfaRequired  Boolean    @default(false)\n  createdAt    DateTime   @default(now())\n  updatedAt    DateTime   @updatedAt\n  cdmEntries   CdmEntry[] @relation(\"CdmEntryCreator\")\n\n  @@map(\"users\")\n}\n\nmodel CdmEntry {\n  id           String   @id @default(cuid())\n  assetClass   String\n  nistFunction String\n  title        String\n  description  String?\n  tool         String?\n  implemented  Boolean  @default(false)\n  pptValue     Float?\n  processValue Float?\n  notes        String?\n  createdById  String?\n  createdBy    User?    @relation(\"CdmEntryCreator\", fields: [createdById], references: [id], onDelete: SetNull)\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  @@map(\"cdm_entries\")\n}\n",
+  "inlineSchemaHash": "20a84794191d22a9331da16be01e24b017da18324f7410f8a3d8de181cfe898a",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"active\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"cdmEntries\",\"kind\":\"object\",\"type\":\"CdmEntry\",\"relationName\":\"CdmEntryCreator\"}],\"dbName\":\"users\"},\"CdmEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"assetClass\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"nistFunction\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tool\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"implemented\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pptValue\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"processValue\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"notes\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdById\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdBy\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CdmEntryCreator\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"cdm_entries\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"active\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"mfaSecret\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"mfaEnabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"mfaRequired\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"cdmEntries\",\"kind\":\"object\",\"type\":\"CdmEntry\",\"relationName\":\"CdmEntryCreator\"}],\"dbName\":\"users\"},\"CdmEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"assetClass\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"nistFunction\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tool\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"implemented\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pptValue\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"processValue\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"notes\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdById\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdBy\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CdmEntryCreator\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"cdm_entries\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

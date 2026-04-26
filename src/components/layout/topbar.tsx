@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Admin',
   EDITOR: 'Editor',
@@ -17,7 +19,12 @@ export function Topbar({ name, role }: { name: string; role: string }) {
         <span className={`text-xs px-2 py-0.5 rounded-full border ${ROLE_COLORS[role] ?? ROLE_COLORS.VIEWER}`}>
           {ROLE_LABELS[role] ?? role}
         </span>
-        <span className="text-sm text-zinc-400">{name}</span>
+        <Link
+          href="/account"
+          className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors"
+        >
+          {name}
+        </Link>
       </div>
     </header>
   )

@@ -1,82 +1,88 @@
 # Cyber Defense Matrix Tool
 
-## Overview of the Cyber Defense Matrix
+## What is This App?
 
-The Cyber Defense Matrix is a framework that organizes cybersecurity activities across two primary dimensions, along with an additional perspective that highlights how resources are applied.
+The Cyber Defense Matrix Tool is a focused web application for mapping, tracking, and communicating your organisation's security controls using the Cyber Defense Matrix (CDM) framework created by Sounil Yu. It gives security teams a single place to document what they have in place, identify where gaps exist, and share that picture with stakeholders — without spreadsheets.
 
----
-
-### 1. Functional Dimension (Horizontal Axis)
-
-This dimension outlines key categories of security activity, aligned with widely recognized practices:
-
-**Identify**
-This area focuses on gaining visibility into an organization's assets, systems, and potential weaknesses. The goal is to understand what needs protection and where risks exist. Tools like asset inventories, vulnerability assessments, and threat intelligence support this effort.
-
-**Protect**
-The emphasis here is on putting safeguards in place to reduce the likelihood or impact of attacks. This includes implementing controls such as access management, system hardening, and security best practices to create multiple layers of defense.
-
-**Detect**
-This function is concerned with discovering security incidents as they occur—or shortly after. Effective monitoring and alerting systems, such as endpoint or network detection tools, help organizations recognize suspicious activity early.
-
-**Respond**
-Once an incident is identified, this area covers how an organization reacts. The objective is to contain the threat, limit damage, and maintain business operations. Having a well-defined incident response plan is essential.
-
-**Recover**
-This focuses on restoring systems and operations following an incident. Activities include data restoration, system repairs, and post-incident reviews to strengthen future resilience.
+![Matrix Dashboard](images/ss1.png)
 
 ---
 
-### 2. Asset Dimension (Vertical Axis)
+## Features
 
-This dimension categorizes what is being protected within the organization:
+### The Matrix Dashboard
 
-**Devices**
-Covers endpoints such as laptops, servers, mobile devices, and other connected hardware.
+The heart of the app is a 5×5 interactive grid. The columns represent the five NIST Cybersecurity Framework functions: **Identify, Protect, Detect, Respond,** and **Recover**, and the rows represent the five asset classes your organisation needs to protect: **Devices, Applications, Networks, Data,** and **Users**.
 
-**Applications**
-Focuses on securing software systems from vulnerabilities, misuse, or unauthorized access.
+Each cell in the grid represents a specific security domain. For example, the cell where *Devices* meets *Detect* is where your endpoint detection capabilities live. Click any cell to open it and see the controls mapped there, or to add new ones.
 
-**Networks**
-Addresses the protection of communication channels and infrastructure from intrusion or misuse.
+Each cell shows a coverage dot at a glance:
+- 🟢 **Green** — all controls in this cell are implemented
+- 🟡 **Yellow** — some controls implemented, some still pending
+- ⚫ **Grey** — no controls defined yet
 
-**Data**
-Centers on safeguarding sensitive information in all states—stored, transmitted, or actively used.
-
-**Users**
-Involves training and enabling individuals to follow secure practices and recognize potential threats.
+A summary bar across the top shows total controls, how many are implemented, how many of the 25 cells have coverage, and your overall implementation rate.
 
 ---
 
-### 3. Resource Emphasis (Continuum)
+### Adding & Managing Controls
 
-In addition to the two axes, the matrix highlights how reliance on people, processes, and technology shifts across activities. Preventive measures tend to rely more heavily on technology, while detection and response increasingly depend on human involvement. Processes provide consistency throughout all areas.
+Clicking a cell opens a panel where you can create, edit, and manage the security controls that belong there. Each control has a title, an optional description, the tool or technology used, and a status toggle to mark it as implemented or pending.
 
----
+When adding a control, the form includes a **reference suggestions panel** — a curated library of real-world controls relevant to that specific cell, drawn from industry frameworks and common security practice. Clicking any suggestion pre-fills the form so you can adopt it as-is or customise it to fit your environment.
 
-## Why Use This Framework?
-
-The matrix provides a structured way to evaluate and improve an organization's security posture. By mapping tools and practices into the grid, teams can better understand coverage and identify weaknesses.
-
-**Key advantages include:**
-
-- **Spotting Gaps** — Unfilled areas in the matrix can reveal missing capabilities or insufficient controls.
-- **Setting Priorities** — Organizations can focus efforts on the most critical risks based on their specific environment and threat landscape.
-- **Monitoring Improvement** — The framework can be reused over time to track progress as new solutions are implemented.
-- **Encouraging Collaboration** — It creates a shared reference point that helps different teams align on responsibilities and strategy.
+![Matrix Dashboard](images/ss2.png)
 
 ---
 
-## Common Ways to Apply the Matrix
+### Technology / People / Process Positioning
 
-Because of its flexibility, this framework can support a variety of security planning and management activities:
+Every control can be positioned on two independent scales that reflect the CDM's resource continuum:
 
-- **Performance Measurement** — Helps translate security work into measurable outcomes that can be communicated to stakeholders.
-- **Technology Planning** — Identifying gaps makes it easier to plan future investments in tools and capabilities.
-- **Resource Planning** — Teams can allocate time and budget more effectively by focusing on the highest-impact risks.
-- **Balancing Business Needs** — Supports aligning security controls with operational requirements, avoiding overly restrictive measures.
-- **Evaluating Security Tools** — Mapping existing solutions can highlight redundancies or missing coverage.
-- **Improving Team Coordination** — The structure provides a common language that helps teams collaborate and ensures smoother transitions during role changes or handoffs.
+**Technology ↔ People gradient**
+A clickable colour bar that lets you indicate how much a given control relies on technology versus people. The dot starts at 50/50 and can be moved left (more technology-dependent) or right (more people-dependent). The split is shown as a live percentage — for example *Technology 70% / People 30%* — always summing to 100%.
+
+**Process / Govern maturity scale**
+A separate green bar represents how mature the process or governance component of that control is, from 0% (just getting started) to 100% (fully embedded).
+
+Both positions are displayed as dots on a live spectrum bar beneath the matrix. When you open a cell, all of its controls appear on the spectrum, making it easy to see at a glance where your programme sits on the people-process-technology continuum.
+
+![Matrix Dashboard](images/ss3.png)
+
+---
+
+### SOA Reference Library
+
+The **SOA Reference** button opens a searchable Security Operations Architecture reference document. It provides descriptions of common security capabilities organised by category, each with subtopics and a one-click copy button — useful for drafting control descriptions or aligning your language with industry-standard terminology.
+
+![Matrix Dashboard](images/ss4.png)
+
+---
+
+### Reporting & Export
+
+**Export PDF Report** generates a professionally formatted A3 landscape PDF report containing:
+- An executive summary with key statistics and asset class coverage bars
+- The full 5×5 matrix overview with colour-coded implementation status per cell
+- A detailed two-column breakdown of every control organised by asset class and NIST function, including tool, description, and notes
+
+**Export CSV** downloads all controls as a flat spreadsheet for use in Excel, Google Sheets, or any reporting tool. Columns include asset class, NIST function, title, description, tool, implementation status, notes, created by, and date.
+
+Both exports are available to all users regardless of role.
+
+![Matrix Dashboard](images/ss5.png)
+
+---
+
+### User Management
+
+Administrators can manage team access from the **User Management** page. Three roles are available:
+
+- **Admin** — full access including user management
+- **Editor** — can create, edit, and delete controls, and export
+- **Viewer** — read-only access and export; cannot modify controls
+
+Admins can create new users, change roles, deactivate accounts, and reset passwords.
 
 
 
@@ -112,27 +118,22 @@ Download and extract the ZIP file, or clone the Git repository.
 
 ### Step 3 — Generate a secret key
 
-**On a Mac:**
 
-1. In the **Terminal** app, type or paste this command and press Enter:
+- (Mac) - In the **Terminal** app, type or paste this command and press Enter:
    ```
    openssl rand -base64 32
    ```
-2. Copy the string.
-
-**On Windows:**
-
-1. Open *PowerShell* and paste this command:
+- (Windows) - Open *PowerShell* and paste this command:
    ```
    [Convert]::ToBase64String((1..32 | ForEach-Object { [byte](Get-Random -Max 256) }))
    ```
-2. Copy the string.
+- Copy the string.
 
 ---
 
 ### Step 4 — Add your secret key to the app
 
-1. Open the project folder and enter the string you copied here, keeping the quotes:
+- Open the project folder and enter the string you copied here, keeping the quotes:
    ```
    NEXTAUTH_SECRET: "change-me-generate-with-openssl-rand-base64-32"
    ```
@@ -142,12 +143,12 @@ Download and extract the ZIP file, or clone the Git repository.
 ### Step 5 — Start the app
 
 
-1. Navigate to the project root project folder and run:
+- Navigate to the project root project folder and run:
    ```
    docker compose up --build
    ```
 
-The first time you run this, it will take **3 to 5 minutes** to download and build everything. You will see a lot of text scrolling by — that is normal. It is finished when you see a line that says **"Ready"**.
+The first time you run this, it will take **3 to 5 minutes** to download and build everything.
 
 ---
 

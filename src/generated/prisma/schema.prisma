@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(VIEWER)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  cdmEntries   CdmEntry[] @relation("CdmEntryCreator")
+
+  @@map("users")
+}
+
+model CdmEntry {
+  id           String   @id @default(cuid())
+  assetClass   String
+  nistFunction String
+  title        String
+  description  String?
+  tool         String?
+  implemented  Boolean  @default(false)
+  pptValue     Float?
+  processValue Float?
+  notes        String?
+  createdById  String?
+  createdBy    User?    @relation("CdmEntryCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("cdm_entries")
+}

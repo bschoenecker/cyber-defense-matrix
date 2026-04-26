@@ -24,7 +24,7 @@ services:
   cdm:
     build: .
     expose:
-      - "3000"
+      - "3001"
     volumes:
       - ./data:/app/data
     environment:

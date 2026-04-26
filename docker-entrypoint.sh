@@ -102,13 +102,6 @@ echo "[CDM] Starting application..."
 node server.js &
 APP_PID=$!
 
-# Next.js prints localhost:3000 (the internal container port).
-# Wait briefly then print the actual host URL to avoid confusion.
-(sleep 2 && echo "" && \
-  echo "[CDM] ✓ Ready — open your browser and visit: http://localhost:3001" && \
-  echo "[CDM]   (ignore the port 3000 shown above — that is the internal container port)" && \
-  echo "") &
-
 # Wait for the app process — this unblocks when node exits or a signal fires
 wait "$APP_PID" || true
 

@@ -21,7 +21,7 @@
 }
 
 cdm.example.com {
-    reverse_proxy cdm:3000
+    reverse_proxy cdm:3001
     encode gzip zstd
     header -Server
     header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"

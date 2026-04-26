@@ -12,7 +12,7 @@ The Cyber Defense Matrix Tool is a focused web application for mapping, tracking
 
 ### The Matrix Dashboard
 
-The heart of the app is a 5×5 interactive grid. The columns represent the five NIST Cybersecurity Framework functions: **Identify, Protect, Detect, Respond,** and **Recover**, and the rows represent the five asset classes your organisation needs to protect: **Devices, Applications, Networks, Data,** and **Users**.
+The heart of the app is a 5×5 interactive grid. The columns represent the five NIST Cybersecurity Framework functions: **Identify, Protect, Detect, Respond,** and **Recover**, and the rows represent the five asset classes your organization needs to protect: **Devices, Applications, Networks, Data,** and **Users**.
 
 Each cell in the grid represents a specific security domain. For example, the cell where *Devices* meets *Detect* is where your endpoint detection capabilities live. Click any cell to open it and see the controls mapped there, or to add new ones.
 

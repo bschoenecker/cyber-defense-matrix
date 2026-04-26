@@ -74,7 +74,10 @@ Both exports are available to all users regardless of role.
 
 ---
 
-### User Management
+<details>
+<summary><strong>User Management and Account Settings</strong></summary>
+
+**User Management**
 
 Administrators can manage team access from the **User Management** page. Three roles are available:
 
@@ -84,9 +87,7 @@ Administrators can manage team access from the **User Management** page. Three r
 
 Admins can create new users, change roles, deactivate accounts, reset passwords, and require MFA enrollment for individual users.
 
----
-
-### Account Settings and Two-Factor Authentication
+**Account Settings**
 
 Every user can access their account settings by clicking their name in the top-right corner of the app. From there they can:
 
@@ -106,66 +107,14 @@ When you next log in, you will be directed to Account Settings automatically and
 **Disabling MFA:**
 MFA can be disabled from the Account Settings page by entering your current password to confirm. Note that if your administrator has required MFA for your account, disabling it will restrict your access again on your next login.
 
----
-
-## Security
-
-### Database Encryption
-
-All application data is stored in a SQLite database that is **encrypted at rest using AES-256-CBC**. The database file on the host machine (`./data/cdm.db.enc`) is fully encrypted and cannot be opened or read without the encryption key. The decrypted copy exists only inside the running container in memory-mapped temporary storage and is never written to the host filesystem.
-
-Encryption and decryption are handled automatically at container startup and shutdown using the `DB_ENCRYPTION_KEY` you set in `docker-compose.yml`. To generate a strong key:
-
-```
-openssl rand -base64 32
-```
-
-If the container is stopped gracefully (via `docker compose down`), the database is re-encrypted before the container exits. A 30-second grace period is configured to ensure this completes before Docker force-kills the container.
-
-### Two-Factor Authentication
-
-The app supports TOTP-based two-factor authentication (compatible with Google Authenticator, Authy, and any RFC 6238 authenticator app). When enabled, a 6-digit rotating code is required at every login in addition to a password.
-
-Administrators can require MFA enrollment for any user account from the User Management page. Users subject to this requirement are gated from accessing the app until they complete setup.
-
-### Passwords
-
-All passwords are hashed using **bcrypt with a cost factor of 12** before being stored. Plain-text passwords are never written to the database.
-
-### Roles and Access Control
-
-Access is enforced server-side on every request. Viewers cannot modify data even if they manipulate the client. Editors cannot access user management. All export routes require authentication.
-
-### HTTP / HTTPS
-
-- **Local use:** The app runs over HTTP on `localhost`. Traffic never leaves your computer. The database is AES-256 encrypted on disk regardless of whether you use HTTP or HTTPS.
-
-- **Shared/networked deployment:** If you deploy this on a server and your team accesses it over a network, HTTPS is strongly recommended. A `docker-compose.prod.yml` and `Caddyfile` are included in the project. Point a domain name at your server, edit the domain in both files, and run `docker compose -f docker-compose.prod.yml up --build`. Caddy will handle obtaining and renewing a free TLS certificate automatically. No certificate management required.
-
-### Other Security Information
-
-**Security Hardening**
-- `X-Frame-Options: DENY` - no clickjacking via iframes
-- `X-Content-Type-Options: nosniff` - no MIME sniffing
-- `Content-Security-Policy` - blocks loading scripts/styles/images from other origins
-- `Permissions-Policy` - disables camera, mic, geolocation
-- Passwords bcrypt-hashed at cost 12
-- Server-side RBAC on every action and route
-- Non-root Docker user
-- JWT sessions (no server-side session store to attack)
-
-**Rate Limiting**
-- 10 failed login attempts per IP per 15 minutes
-- 10 failed attempts per email address per 15 minutes (blocks distributed attacks targeting one account)
-- Sessions expire after 8 hours
+</details>
 
 ---
 
-## Super Easy Installation Guide
+<details>
+<summary><strong>Installation Guide</strong></summary>
 
 This app runs entirely inside Docker, a tool that packages the application so it works the same way on any computer. You do not need to install Node.js, a database, or any programming tools. Docker is the only thing you need.
-
----
 
 ### Step 1 - Install Docker Desktop
 
@@ -179,13 +128,9 @@ Go to [https://www.docker.com/products/docker-desktop](https://www.docker.com/pr
 
 Go to [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 
----
-
 ### Step 2 - Get the project
 
 Download and extract the ZIP file, or clone the Git repository.
-
----
 
 ### Step 3 - Generate a secret key
 
@@ -199,16 +144,12 @@ Download and extract the ZIP file, or clone the Git repository.
    ```
 - Copy the string.
 
----
-
 ### Step 4 - Add your secret key to the app
 
 Open `docker-compose.yml` in the project folder and replace the placeholder value here, keeping the quotes:
 ```
 NEXTAUTH_SECRET: "change-me-generate-with-openssl-rand-base64-32"
 ```
-
----
 
 ### Step 5 - Start the app
 
@@ -218,8 +159,6 @@ docker compose up --build
 ```
 
 The first time you run this, it will take **3 to 5 minutes** to download and build everything.
-
----
 
 ### Step 6 - Open the app
 
@@ -236,19 +175,49 @@ Sign in with the default credentials:
 
 > You should change the default password after your first login via the User Management page.
 
----
-
 ### Starting and stopping the app
 
 To **stop** the app, use `Control + C`.
 
 To **start** it again later, run `docker compose up` without `--build`, which makes it much faster.
 
----
-
 ### Your data
 
-All of your data is stored in a file called `cdm.db` inside a `data` folder in the project directory. To back up your work, simply copy that file somewhere safe. To restore it, copy it back.
+Your data is stored as an AES-256 encrypted file called `cdm.db.enc` inside the `data` folder in the project directory. The file is unreadable without the `DB_ENCRYPTION_KEY` set in `docker-compose.yml`. To back up your data, copy `cdm.db.enc` somewhere safe along with your `docker-compose.yml` so you retain the decryption key. To restore, copy both files back and start the app.
+
+</details>
+
+---
+
+<details>
+<summary><strong>Security</strong></summary>
+
+**Security Hardening**
+
+- `X-Frame-Options: DENY` - no clickjacking via iframes
+- `X-Content-Type-Options: nosniff` - no MIME sniffing
+- `Content-Security-Policy` - blocks loading scripts/styles/images from other origins
+- `Permissions-Policy` - disables camera, mic, geolocation
+- Passwords bcrypt-hashed at cost 12
+- Database AES-256 encrypted at rest
+- TOTP MFA with admin-enforced enrollment
+- Server-side RBAC on every action and route
+- Non-root Docker user
+- JWT sessions (no server-side session store to attack)
+
+**Rate Limiting**
+
+- 10 failed login attempts per IP per 15 minutes
+- 10 failed attempts per email address per 15 minutes (blocks distributed attacks targeting one account)
+- Sessions expire after 8 hours
+
+**HTTP / HTTPS**
+
+- **Local use:** The app runs over HTTP on `localhost`. Traffic never leaves your computer. The database is AES-256 encrypted on disk regardless of whether you use HTTP or HTTPS.
+
+- **Shared/networked deployment:** If you deploy this on a server and your team accesses it over a network, HTTPS is strongly recommended. A `docker-compose.prod.yml` and `Caddyfile` are included in the project. Point a domain name at your server, edit the domain in both files, and run `docker compose -f docker-compose.prod.yml up --build`. Caddy will handle obtaining and renewing a free TLS certificate automatically. No certificate management required.
+
+</details>
 
 ---
 

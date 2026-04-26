@@ -2,7 +2,7 @@
 
 ## What is This App?
 
-The Cyber Defense Matrix Tool is a focused web application for mapping, tracking, and communicating your organisation's security controls using the Cyber Defense Matrix (CDM) framework created by Sounil Yu. It gives security teams a single place to document what they have in place, identify where gaps exist, and share that picture with stakeholders — without spreadsheets.
+The Cyber Defense Matrix Tool is a focused web application for mapping, tracking, and communicating your organisation's security controls using the Cyber Defense Matrix (CDM) framework created by Sounil Yu. It gives security teams a single place to document what they have in place, identify where gaps exist, and share that picture with stakeholders without spreadsheets.
 
 ![Matrix Dashboard](images/ss1.png)
 
@@ -29,7 +29,7 @@ A summary bar across the top shows total controls, how many are implemented, how
 
 Clicking a cell opens a panel where you can create, edit, and manage the security controls that belong there. Each control has a title, an optional description, the tool or technology used, and a status toggle to mark it as implemented or pending.
 
-When adding a control, the form includes a **reference suggestions panel** — a curated library of real-world controls relevant to that specific cell, drawn from industry frameworks and common security practice. Clicking any suggestion pre-fills the form so you can adopt it as-is or customise it to fit your environment.
+When adding a control, the form includes a **reference suggestions panel**; a curated library of real-world controls relevant to that specific cell, drawn from industry frameworks and common security practice. Clicking any suggestion pre-fills the form so you can adopt it as-is or customise it to fit your environment.
 
 ![Matrix Dashboard](images/ss2.png)
 
@@ -40,7 +40,7 @@ When adding a control, the form includes a **reference suggestions panel** — a
 Every control can be positioned on two independent scales that reflect the CDM's resource continuum:
 
 **Technology ↔ People gradient**
-A clickable colour bar that lets you indicate how much a given control relies on technology versus people. The dot starts at 50/50 and can be moved left (more technology-dependent) or right (more people-dependent). The split is shown as a live percentage — for example *Technology 70% / People 30%* — always summing to 100%.
+A clickable color bar that lets you indicate how much a given control relies on technology versus people. The dot starts at 50/50 and can be moved left (more technology-dependent) or right (more people-dependent). The split is shown as a live percentage — for example *Technology 70% / People 30%* — always summing to 100%.
 
 **Process / Govern maturity scale**
 A separate green bar represents how mature the process or governance component of that control is, from 0% (just getting started) to 100% (fully embedded).

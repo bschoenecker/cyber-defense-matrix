@@ -136,6 +136,29 @@ All passwords are hashed using **bcrypt with a cost factor of 12** before being 
 
 Access is enforced server-side on every request. Viewers cannot modify data even if they manipulate the client. Editors cannot access user management. All export routes require authentication.
 
+### HTTP / HTTPS
+
+- **Local use:** The app runs over HTTP on `localhost`. Traffic never leaves your computer. The database is AES-256 encrypted on disk regardless of whether you use HTTP or HTTPS.
+
+- **Shared/networked deployment:** If you deploy this on a server and your team accesses it over a network, HTTPS is strongly recommended. A `docker-compose.prod.yml` and `Caddyfile` are included in the project. Point a domain name at your server, edit the domain in both files, and run `docker compose -f docker-compose.prod.yml up --build`. Caddy will handle obtaining and renewing a free TLS certificate automatically. No certificate management required.
+
+### Other Security Information
+
+**Security Hardening**
+- `X-Frame-Options: DENY` - no clickjacking via iframes
+- `X-Content-Type-Options: nosniff` - no MIME sniffing
+- `Content-Security-Policy` - blocks loading scripts/styles/images from other origins
+- `Permissions-Policy` - disables camera, mic, geolocation
+- Passwords bcrypt-hashed at cost 12
+- Server-side RBAC on every action and route
+- Non-root Docker user
+- JWT sessions (no server-side session store to attack)
+
+**Rate Limiting**
+- 10 failed login attempts per IP per 15 minutes
+- 10 failed attempts per email address per 15 minutes (blocks distributed attacks targeting one account)
+- Sessions expire after 8 hours
+
 ---
 
 ## Super Easy Installation Guide
@@ -212,35 +235,6 @@ Sign in with the default credentials:
 - **Password:** `ChangeMe123!`
 
 > You should change the default password after your first login via the User Management page.
-
----
-
-### Security
-
-**Security Hardening**
-
-- `X-Frame-Options: DENY` - no clickjacking via iframes
-- `X-Content-Type-Options: nosniff` - no MIME sniffing
-- `Content-Security-Policy` - blocks loading scripts/styles/images from other origins
-- `Permissions-Policy` - disables camera, mic, geolocation
-- Passwords bcrypt-hashed at cost 12
-- Database AES-256 encrypted at rest
-- TOTP MFA with admin-enforced enrollment
-- Server-side RBAC on every action and route
-- Non-root Docker user
-- JWT sessions (no server-side session store to attack)
-
-**Rate Limiting**
-
-- 10 failed login attempts per IP per 15 minutes
-- 10 failed attempts per email address per 15 minutes (blocks distributed attacks targeting one account)
-- Sessions expire after 8 hours
-
-**HTTP / HTTPS**
-
-- **Local use:** The app runs over HTTP on `localhost`. Traffic never leaves your computer. The database is AES-256 encrypted on disk regardless of whether you use HTTP or HTTPS.
-
-- **Shared/networked deployment:** If you deploy this on a server and your team accesses it over a network, HTTPS is strongly recommended. A `docker-compose.prod.yml` and `Caddyfile` are included in the project. Point a domain name at your server, edit the domain in both files, and run `docker compose -f docker-compose.prod.yml up --build`. Caddy will handle obtaining and renewing a free TLS certificate automatically. No certificate management required.
 
 ---
 

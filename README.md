@@ -120,11 +120,7 @@ This app runs entirely inside Docker, a tool that packages the application so it
 
 Docker Desktop is a free application that lets you run containerized apps like this one.
 
-**On a Mac:**
-
-Go to [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
-
-**On Windows 11:**
+**On a Mac or Windows 11:**
 
 Go to [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 
